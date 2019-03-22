@@ -3,54 +3,39 @@ package main
 import (
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
+	"io"
+	"io/ioutil"
 	"log"
 	"time"
 )
 
-var messagesBase []*imap.Message
-
-//var lastId uint32
-//= messagesBase[len(messagesBase)-1].Uid
+var messagesBase []SendMailStruct
 
 func mailGetter() {
-	log.Println("Connecting to server...")
-
 	c, err := client.DialTLS("imap.yandex.ru:993", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Connected")
 
-	defer c.Logout()
-
 	if err := c.Login("fatherofbots", "lermonter07"); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Logged in")
 
-	check(c)
+	defer c.Logout()
 
-	log.Println("Done!")
-}
-
-func check(c *client.Client) {
 	for {
-		mailboxes := make(chan *imap.MailboxInfo, 10)
-		done := make(chan error, 1)
-		go func() {
-			done <- c.List("", "*", mailboxes)
-		}()
-
-		if err := <-done; err != nil {
-			log.Fatal(err)
-		}
-
 		mbox, err := c.Select("INBOX", false)
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		if mbox.Messages == 0 {
+			log.Println("No messages in mailbox")
+		}
 		time.Sleep(time.Second * 5)
+
 		from := uint32(len(messagesBase) + 1)
 		to := mbox.Messages
 		if from > to {
@@ -59,19 +44,54 @@ func check(c *client.Client) {
 		seqset := new(imap.SeqSet)
 		seqset.AddRange(from, to)
 
+		section := &imap.BodySectionName{}
+		items := []imap.FetchItem{section.FetchItem()}
+
 		messages := make(chan *imap.Message)
-		done = make(chan error, 1)
 		go func() {
-			done <- c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope}, messages)
+			if err := c.Fetch(seqset, items, messages); err != nil {
+				log.Fatal(err)
+			}
 		}()
 
 		for msg := range messages {
-			messagesBase = append(messagesBase, msg)
-			log.Println("* " + msg.Envelope.Subject)
-		}
+			if msg == nil {
+				log.Fatal("Server didn't returned message")
+			}
 
-		if err := <-done; err != nil {
-			log.Fatal(err)
+			r := msg.GetBody(section)
+			if r == nil {
+				log.Fatal("Server didn't returned message body")
+			}
+
+			mr, err := mail.CreateReader(r)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for {
+				p, err := mr.NextPart()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					log.Fatal(err)
+				}
+
+				header := mr.Header
+				switch h := p.Header.(type) {
+				case mail.TextHeader:
+					b, _ := ioutil.ReadAll(p.Body)
+					from, _ := header.AddressList("From")
+					subject, _ := header.Subject()
+					messagesBase = append(messagesBase, SendMailStruct{from[0].Address, string(b), subject})
+				case mail.AttachmentHeader:
+					filename, _ := h.Filename()
+					log.Println("Got attachment: %v", filename)
+				}
+			}
 		}
 	}
+}
+func messageToStruct(to string, subject string, body string) SendMailStruct {
+	return SendMailStruct{to, body, subject}
 }
