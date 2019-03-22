@@ -5,13 +5,13 @@ import (
 	"net/smtp"
 )
 
-func mailSender(to string, body string) {
+func mailSender(to string, body string, subject string) {
 	from := "fatherofbots@yandex.ru"
 	pass := "lermonter07"
 
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
-		"Subject: Hello there\n\n" +
+		"Subject:" + subject + "\n" +
 		body
 
 	err := smtp.SendMail("smtp.yandex.ru:465",
