@@ -1,27 +1,103 @@
 package main
 
 import (
+	"crypto/tls"
+	"fmt"
 	"log"
 	"net/smtp"
+	"strings"
 )
 
-func mailSender(to string, body string, subject string) {
-	from := "fatherofbots@yandex.ru"
-	pass := "lermonter07"
+type Mail struct {
+	senderId string
+	toIds    []string
+	subject  string
+	body     string
+}
 
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject:" + subject + "\n" +
-		body
+type SmtpServer struct {
+	host string
+	port string
+}
 
-	err := smtp.SendMail("smtp.yandex.ru:465",
-		smtp.PlainAuth("", from, pass, "smtp.yandex.ru"),
-		from, []string{to}, []byte(msg))
+func (s *SmtpServer) ServerName() string {
+	return s.host + ":" + s.port
+}
 
-	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
+func (mail *Mail) BuildMessage() string {
+	message := ""
+	message += fmt.Sprintf("From: %s\r\n", mail.senderId)
+	if len(mail.toIds) > 0 {
+		message += fmt.Sprintf("To: %s\r\n", strings.Join(mail.toIds, ";"))
 	}
 
-	log.Print("Message sent!")
+	message += fmt.Sprintf("Subject: %s\r\n", mail.subject)
+	message += "\r\n" + mail.body
+
+	return message
+}
+
+func mailSender(recepient string, body string, subject string) {
+	mail := Mail{}
+	mail.senderId = "fatherofbots@yandex.ru"
+	mail.toIds = []string{recepient}
+	mail.subject = subject
+	mail.body = body
+
+	messageBody := mail.BuildMessage()
+
+	smtpServer := SmtpServer{host: "smtp.yandex.ru", port: "465"}
+
+	log.Println(smtpServer.host)
+	auth := smtp.PlainAuth("", mail.senderId, "lermonter07", smtpServer.host)
+
+	tlsconfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         smtpServer.host,
+	}
+
+	conn, err := tls.Dial("tcp", smtpServer.ServerName(), tlsconfig)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	client, err := smtp.NewClient(conn, smtpServer.host)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	// step 1: Use Auth
+	if err = client.Auth(auth); err != nil {
+		log.Panic(err)
+	}
+
+	// step 2: add all from and to
+	if err = client.Mail(mail.senderId); err != nil {
+		log.Panic(err)
+	}
+	for _, k := range mail.toIds {
+		if err = client.Rcpt(k); err != nil {
+			log.Panic(err)
+		}
+	}
+
+	// Data
+	w, err := client.Data()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	_, err = w.Write([]byte(messageBody))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	err = w.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	client.Quit()
+
+	log.Println("Mail sent successfully")
 }

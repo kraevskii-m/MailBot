@@ -21,12 +21,14 @@ func server() {
 
 func postHandler(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
-	var letter SendMailStruct
-	err := decoder.Decode(&letter)
+	var letters [][]string
+	err := decoder.Decode(&letters)
 	if err != nil {
 		panic(err)
 	}
-	mailSender(letter.to, letter.body, letter.subject)
+	for _, let := range letters {
+		mailSender(let[0], let[1], let[2])
+	}
 }
 
 func getUpdates(writer http.ResponseWriter, request *http.Request) {
