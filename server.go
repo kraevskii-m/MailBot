@@ -13,13 +13,13 @@ type SendMailStruct struct {
 }
 
 func server() {
-	http.HandleFunc("/send", postHandler)
+	http.HandleFunc("/send", sengLetters)
 	http.HandleFunc("/updates", getUpdates)
 	log.Println("Listening...")
 	http.ListenAndServe(":3000", nil)
 }
 
-func postHandler(writer http.ResponseWriter, request *http.Request) {
+func sengLetters(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	var letters [][]string
 	err := decoder.Decode(&letters)

@@ -66,12 +66,10 @@ func mailSender(recepient string, body string, subject string) {
 		log.Panic(err)
 	}
 
-	// step 1: Use Auth
 	if err = client.Auth(auth); err != nil {
 		log.Panic(err)
 	}
 
-	// step 2: add all from and to
 	if err = client.Mail(mail.senderId); err != nil {
 		log.Panic(err)
 	}
@@ -81,7 +79,6 @@ func mailSender(recepient string, body string, subject string) {
 		}
 	}
 
-	// Data
 	w, err := client.Data()
 	if err != nil {
 		log.Panic(err)
