@@ -12,6 +12,8 @@ type SendMailStruct struct {
 	subject string
 }
 
+var sentMailNumber = 0
+
 func server() {
 	http.HandleFunc("/send", sengLetters)
 	http.HandleFunc("/updates", getUpdates)
@@ -26,14 +28,16 @@ func sengLetters(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	for _, let := range letters {
+	for _, let := range letters[sentMailNumber:] {
 		mailSender(let[0], let[1], let[2])
 	}
+	sentMailNumber = len(letters)
 }
 
 func getUpdates(writer http.ResponseWriter, request *http.Request) {
 	var formattedMessages [][]string
-	for _, msg := range messagesBase {
+	var mbase = MessagesBase.Load().([]SendMailStruct)
+	for _, msg := range mbase {
 		formattedMessages = append(formattedMessages, []string{msg.to, msg.body, msg.subject})
 	}
 	output, _ := json.Marshal(formattedMessages)

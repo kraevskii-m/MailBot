@@ -7,12 +7,21 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"sync/atomic"
 	"time"
 )
 
-var messagesBase []SendMailStruct
+var MessagesBase atomic.Value //todo not thread safe
 
-func mailGetter() {
+func getCuttentMessages() []SendMailStruct {
+	var mbase = MessagesBase.Load()
+	if mbase == nil {
+		return []SendMailStruct{}
+	}
+	return mbase.([]SendMailStruct)
+}
+
+func mailGetter() { // todo Store content type
 	c, err := client.DialTLS("imap.yandex.ru:993", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -27,6 +36,7 @@ func mailGetter() {
 	defer c.Logout()
 
 	for {
+		var mbase = getCuttentMessages()
 		mbox, err := c.Select("INBOX", false)
 		if err != nil {
 			log.Fatal(err)
@@ -36,7 +46,7 @@ func mailGetter() {
 		}
 		time.Sleep(time.Second * 5)
 
-		from := uint32(len(messagesBase) + 1)
+		from := uint32(len(mbase) + 1)
 		to := mbox.Messages
 		if from > to {
 			continue
@@ -83,7 +93,8 @@ func mailGetter() {
 					b, _ := ioutil.ReadAll(p.Body)
 					from, _ := header.AddressList("From")
 					subject, _ := header.Subject()
-					messagesBase = append(messagesBase, SendMailStruct{from[0].Address, string(b), subject})
+					var tempMessages = append(mbase, SendMailStruct{from[0].Address, string(b), subject})
+					MessagesBase.Store(tempMessages)
 				case mail.AttachmentHeader:
 					filename, _ := h.Filename()
 					log.Println("Got attachment: %v", filename)

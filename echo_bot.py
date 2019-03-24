@@ -12,7 +12,6 @@ class Mail:
         self.address = address
         self.subject = subject
 
-
 resp = requests.get(url=url + "/updates")
 data = resp.json()
 

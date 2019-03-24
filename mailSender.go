@@ -96,5 +96,5 @@ func mailSender(recepient string, body string, subject string) {
 
 	client.Quit()
 
-	log.Println("Mail sent successfully")
+	log.Println("Mail sent successfully" + string(mail.toIds[0]))
 }
