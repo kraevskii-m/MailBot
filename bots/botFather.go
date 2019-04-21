@@ -10,11 +10,11 @@ import (
 )
 
 var url = "http://localhost:8080/updates"
-var token = "bf6djf03ng62sxg5"
+var tokenBotFather = "bf6djf03ng62sxg5"
 
 func getUpdates() {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", token)
+	req.Header.Add("Authorization", tokenBotFather)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

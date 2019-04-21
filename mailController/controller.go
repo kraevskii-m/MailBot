@@ -8,7 +8,10 @@ import (
 )
 
 func Get(token string, offset string, limit string) ([]byte, error) {
-	letters := data.GetLetters(token)
+	letters, err := data.GetLetters(token)
+	if err != nil {
+		return nil, err
+	}
 	if offset != "" {
 		num, err := strconv.Atoi(offset)
 		if err != nil {

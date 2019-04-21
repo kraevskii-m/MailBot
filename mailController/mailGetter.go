@@ -4,6 +4,7 @@ import (
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
+	"github.com/kraevskii-m/MailBot/data"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,10 @@ import (
 )
 
 var MessagesBase atomic.Value //todo not thread safe
+
+func GetUpdatesForBot(token string) []data.Letter {
+
+}
 
 func getCuttentMessages() []SendMailStruct {
 	var mbase = MessagesBase.Load()

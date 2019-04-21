@@ -15,10 +15,10 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	wg.Add(1)
-	server()
+	go server()
 
 	wg.Add(1)
-	data.UpdatesController()
+	go data.UpdatesController()
 
 	wg.Wait()
 }
