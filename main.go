@@ -8,15 +8,22 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 )
 
 func main() {
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
 	server()
+
+	wg.Add(1)
+	data.UpdatesController()
+
+	wg.Wait()
 }
 
 func server() {
-	data.Initialize()
-
 	r := mux.NewRouter()
 	log.Println("Listening...")
 	r.Handle("/", http.FileServer(http.Dir("./about/")))

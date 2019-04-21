@@ -1,12 +1,18 @@
 package data
 
+import (
+	"errors"
+	"sync/atomic"
+	"time"
+)
+
 type Bot struct {
 	Token    string
 	Username string
 	Password string
 }
 
-var database map[string]Bot
+var database atomic.Value
 
 func Initialize() {
 	NewBot("botfather")
@@ -26,15 +32,36 @@ func NewBot(name string) Bot {
 		output.Password = "lermonter07"
 	}
 
+	var base = database.Load()
+	var botBase []Bot
+	if base != nil {
+		botBase = base.([]Bot)
+	}
+	botBase = append(botBase, output)
+	database.Store(botBase)
 	return output
 }
 
-func GetBot(name string) Bot {
-	return Bot{}
+func GetBot(name string) (Bot, error) {
+	var bots = database.Load().([]Bot)
+	for _, bot := range bots {
+		if bot.Username == name {
+			return bot, nil
+		}
+	}
+
+	return Bot{}, errors.New("There is no bot")
 }
 
-func GetByToken(token string) Bot {
-	return Bot{}
+func GetByToken(token string) (Bot, error) {
+	var bots = database.Load().([]Bot)
+	for _, bot := range bots {
+		if bot.Token == token {
+			return bot, nil
+		}
+	}
+
+	return Bot{}, errors.New("There is no bot")
 }
 
 type Letter struct {
@@ -45,5 +72,26 @@ type Letter struct {
 }
 
 func GetLetters(token string) []Letter {
+	return []Letter{}
+}
+
+func UpdatesController() {
+	Initialize()
+
+	for {
+		time.Sleep(1 * time.Second)
+		var base = database.Load()
+		var botBase []Bot
+		if base == nil {
+			continue
+		}
+
+		for _, bot := range botBase {
+			updateMailbox(bot)
+		}
+	}
+}
+
+func updateMailbox(bot Bot) {
 
 }
