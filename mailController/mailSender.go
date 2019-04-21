@@ -1,4 +1,4 @@
-package main
+package mailController
 
 import (
 	"crypto/tls"
@@ -37,7 +37,7 @@ func (mail *Mail) BuildMessage() string {
 	return message
 }
 
-func mailSender(recepient string, body string, subject string) {
+func sender(from string, recepient string, body string, subject string) {
 	mail := Mail{}
 	mail.senderId = "fatherofbots@yandex.ru"
 	mail.toIds = []string{recepient}

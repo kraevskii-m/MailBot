@@ -1,4 +1,4 @@
-package main
+package mailController
 
 import (
 	"github.com/emersion/go-imap"
@@ -102,7 +102,4 @@ func mailGetter() { // todo Store content type
 			}
 		}
 	}
-}
-func messageToStruct(to string, subject string, body string) SendMailStruct {
-	return SendMailStruct{to, body, subject}
 }
