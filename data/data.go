@@ -2,10 +2,7 @@ package data
 
 import (
 	"errors"
-	"github.com/kraevskii-m/MailBot/mailController"
-	"sync"
 	"sync/atomic"
-	"time"
 )
 
 type Bot struct {
@@ -14,12 +11,8 @@ type Bot struct {
 	Password string
 }
 
-var botStorage atomic.Value
-var letterStorage atomic.Value
-
-func Initialize() {
-	NewBot("botfather")
-}
+var BotStorage atomic.Value
+var LetterStorage atomic.Value
 
 func NewBot(name string) Bot {
 	output := Bot{}
@@ -35,27 +28,27 @@ func NewBot(name string) Bot {
 		output.Password = "lermonter07"
 	}
 
-	var base = botStorage.Load()
+	var base = BotStorage.Load()
 	var botBase []Bot
 	if base != nil {
 		botBase = base.([]Bot)
 	}
 	botBase = append(botBase, output)
-	botStorage.Store(botBase)
+	BotStorage.Store(botBase)
 
-	var mailBase = letterStorage.Load()
+	var mailBase = LetterStorage.Load()
 	var letterBase map[string][]Letter
 	if mailBase != nil {
 		letterBase = mailBase.(map[string][]Letter)
 	}
 	letterBase[output.Token] = []Letter{}
-	letterStorage.Store(letterBase)
+	LetterStorage.Store(letterBase)
 
 	return output
 }
 
 func GetBot(name string) (Bot, error) {
-	var bots = botStorage.Load().([]Bot)
+	var bots = BotStorage.Load().([]Bot)
 	for _, bot := range bots {
 		if bot.Username == name {
 			return bot, nil
@@ -66,7 +59,7 @@ func GetBot(name string) (Bot, error) {
 }
 
 func GetByToken(token string) (Bot, error) {
-	var bots = botStorage.Load().([]Bot)
+	var bots = BotStorage.Load().([]Bot)
 	for _, bot := range bots {
 		if bot.Token == token {
 			return bot, nil
@@ -84,7 +77,7 @@ type Letter struct {
 }
 
 func GetLetters(token string) ([]Letter, error) {
-	var base = letterStorage.Load()
+	var base = LetterStorage.Load()
 	var letterBase map[string][]Letter
 	if base == nil {
 		return nil, errors.New("Empty database")
@@ -95,36 +88,4 @@ func GetLetters(token string) ([]Letter, error) {
 	}
 
 	return nil, errors.New("Empty mailbox")
-}
-
-func UpdatesController() {
-	Initialize()
-
-	for {
-		time.Sleep(1 * time.Second)
-		var base = botStorage.Load()
-		var botBase []Bot
-		if base == nil {
-			continue
-		}
-
-		wg := &sync.WaitGroup{}
-
-		wg.Add(1) //TODO Check
-		for _, bot := range botBase {
-			go updateMailbox(bot)
-		}
-	}
-}
-
-func updateMailbox(bot Bot) {
-	var base = letterStorage.Load()
-	var letterBase map[string][]Letter
-	if base == nil {
-		letterStorage.Store(letterBase)
-		return
-	}
-	letterBase = base.(map[string][]Letter)
-	letterBase[bot.Token] = mailController.GetUpdatesForBot(bot.Token)
-	letterStorage.Store(letterBase)
 }

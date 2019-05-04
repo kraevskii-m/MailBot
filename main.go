@@ -18,7 +18,7 @@ func main() {
 	go server()
 
 	wg.Add(1)
-	go data.UpdatesController()
+	go mailController.UpdatesController()
 
 	wg.Wait()
 }
@@ -36,7 +36,12 @@ func server() {
 
 var register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	if vars["token"] != data.GetBot("botfather").Token {
+	bot, err := data.GetBot("botfather")
+	if err != nil {
+		http.Error(w, "Missing botfather", http.StatusBadRequest)
+		return
+	}
+	if vars["token"] != bot.Token {
 		http.Error(w, "You are not BotFather!", http.StatusBadRequest)
 		return
 	}

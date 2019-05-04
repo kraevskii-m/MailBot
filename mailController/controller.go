@@ -5,6 +5,8 @@ import (
 	"github.com/kraevskii-m/MailBot/data"
 	"io"
 	"strconv"
+	"sync"
+	"time"
 )
 
 func Get(token string, offset string, limit string) ([]byte, error) {
@@ -46,4 +48,40 @@ func MailSender(token string, body io.ReadCloser) {
 	for _, let := range letters {
 		sender(let[0], let[1], let[2], let[3])
 	}
+}
+
+func Initialize() {
+	data.NewBot("botfather")
+}
+
+func UpdatesController() {
+	Initialize()
+
+	for {
+		time.Sleep(1 * time.Second)
+		var base = data.BotStorage.Load()
+		var botBase []data.Bot
+		if base == nil {
+			continue
+		}
+
+		wg := &sync.WaitGroup{}
+
+		wg.Add(1) //TODO Check
+		for _, bot := range botBase {
+			go UpdateMailbox(bot)
+		}
+	}
+}
+
+func UpdateMailbox(bot data.Bot) {
+	var base = data.LetterStorage.Load()
+	var letterBase map[string][]data.Letter
+	if base == nil {
+		data.LetterStorage.Store(letterBase)
+		return
+	}
+	letterBase = base.(map[string][]data.Letter)
+	letterBase[bot.Token] = GetUpdatesForBot(bot.Token)
+	data.LetterStorage.Store(letterBase)
 }
