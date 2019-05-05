@@ -76,12 +76,12 @@ func UpdatesController() {
 
 func UpdateMailbox(bot data.Bot) {
 	var base = data.LetterStorage.Load()
-	var letterBase map[string][]data.Letter
+	var letterBase map[string][]data.Message
 	if base == nil {
 		data.LetterStorage.Store(letterBase)
 		return
 	}
-	letterBase = base.(map[string][]data.Letter)
+	letterBase = base.(map[string][]data.Message)
 	letterBase[bot.Token] = GetUpdatesForBot(bot.Token)
 	data.LetterStorage.Store(letterBase)
 }

@@ -14,7 +14,7 @@ import (
 
 var MessagesBase atomic.Value //todo not thread safe
 
-func GetUpdatesForBot(token string) []data.Letter {
+func GetUpdatesForBot(token string) []data.Message {
 
 }
 

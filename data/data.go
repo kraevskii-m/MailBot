@@ -37,11 +37,11 @@ func NewBot(name string) Bot {
 	BotStorage.Store(botBase)
 
 	var mailBase = LetterStorage.Load()
-	var letterBase map[string][]Letter
+	var letterBase map[string][]Message
 	if mailBase != nil {
-		letterBase = mailBase.(map[string][]Letter)
+		letterBase = mailBase.(map[string][]Message)
 	}
-	letterBase[output.Token] = []Letter{}
+	letterBase[output.Token] = []Message{}
 	LetterStorage.Store(letterBase)
 
 	return output
@@ -69,20 +69,20 @@ func GetByToken(token string) (Bot, error) {
 	return Bot{}, errors.New("There is no bot")
 }
 
-type Letter struct {
+type Message struct {
 	From    string
 	To      string
 	Subject string
 	Body    string
 }
 
-func GetLetters(token string) ([]Letter, error) {
+func GetLetters(token string) ([]Message, error) {
 	var base = LetterStorage.Load()
-	var letterBase map[string][]Letter
+	var letterBase map[string][]Message
 	if base == nil {
 		return nil, errors.New("Empty database")
 	}
-	letterBase = base.(map[string][]Letter)
+	letterBase = base.(map[string][]Message)
 	if val, ok := letterBase[token]; ok {
 		return val, nil
 	}
