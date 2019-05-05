@@ -5,6 +5,8 @@ import (
 	"sync/atomic"
 )
 
+var TokenBotFather = "bf6djf03ng62sxg5"
+
 type Bot struct {
 	Token    string
 	Username string

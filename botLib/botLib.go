@@ -10,33 +10,33 @@ import (
 )
 
 type MailBot struct {
-	token string
+	Token string
 }
 
 type Message struct {
-	from    string
-	to      string
-	subject string
-	body    string
+	From    string
+	To      string
+	Subject string
+	Body    string
 }
 
 func NewMailBot(token string) *MailBot {
 	bot := new(MailBot)
-	bot.token = token
+	bot.Token = token
 	return bot
 }
 
 func NewMessage(from string, to string, subject string, body string) *Message {
 	message := new(Message)
-	message.from = from
-	message.to = to
-	message.subject = subject
-	message.body = body
+	message.From = from
+	message.To = to
+	message.Subject = subject
+	message.Body = body
 	return message
 }
 
-func (bot *MailBot) SendMessage(message Message) error {
-	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.token)
+func (bot *MailBot) SendMessage(message Message) error { // todo add offset and limit
+	address := fmt.Sprintf("https://localhost:3000/bot%v/sendmessage", bot.Token)
 	data, err := json.Marshal(message)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (bot *MailBot) SendMessage(message Message) error {
 }
 
 func (bot *MailBot) GetUpdates() ([]Message, error) {
-	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.token)
+	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.Token)
 	resp, err := http.Get(address)
 	if err != nil {
 		return nil, err
