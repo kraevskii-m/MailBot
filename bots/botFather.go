@@ -8,6 +8,7 @@ import (
 )
 
 var url = "http://localhost:8080/updates"
+var address = ""
 
 func BotController() {
 	bot := botLib.NewMailBot(data.TokenBotFather) //todo change
@@ -18,12 +19,17 @@ func BotController() {
 			log.Print(err)
 		}
 		for _, message := range messages {
-			go register(message)
+			go register(message, data.MemoryStorage{}) //todo fix
 		}
 	}
 }
-func register(message botLib.Message) {
-
+func register(message botLib.Message, storage data.Storage) {
+	err := storage.AddBot(message.Body)
+	if err != nil {
+		log.Print(err)
+		botLib.NewMessage(address, message.From, message.Subject, "Произошла ошибка! "+err.Error())
+		return
+	}
 }
 
 //func getUpdates() {

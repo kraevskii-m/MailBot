@@ -1,7 +1,7 @@
 package data
 
 type Storage interface {
-	addBot()
-	getBot() Bot
-	getMessages(bot Bot, offset int, limit int) []Message
+	AddBot(name string) error
+	GetBot(token string) Bot
+	GetMessages(bot Bot, offset int, limit int) []Message
 }
