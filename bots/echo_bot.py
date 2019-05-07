@@ -2,7 +2,7 @@ import json
 
 import requests
 
-url = 'http://localhost:3000'
+url = 'http://localhost:3000' //todo add py library and rewrite
 
 
 class Mail:

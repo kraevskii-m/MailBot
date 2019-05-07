@@ -5,10 +5,9 @@ import (
 	"net/http"
 )
 
-var url = "http://localhost:3000"
-var token = "asdfghjk"
+var address = "" //todo add current BotFatherEmail
 
-func echoBot() {
+func echoBot() { //todo complete ECHOBOT
 	resp, err := http.Get(url + "/bot" + token + "/getupdates")
 	if err != nil {
 		log.Fatal(err)

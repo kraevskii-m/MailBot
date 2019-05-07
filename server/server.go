@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Start() {
+func Start() { //todo make cleanup!
 	r := mux.NewRouter()
 	log.Println("Listening...")
 	r.Handle("/", http.FileServer(http.Dir("./about/")))

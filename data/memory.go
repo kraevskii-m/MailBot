@@ -1,11 +1,8 @@
 package data
 
 import (
-	"errors"
 	"sync/atomic"
 )
-
-var TokenBotFather = "bf6djf03ng62sxg5"
 
 type Bot struct {
 	Token    string
@@ -17,8 +14,12 @@ var BotStorage atomic.Value
 var LetterStorage atomic.Value
 
 type MemoryStorage struct {
-	BotStorage atomic.Value
+	BotStorage    atomic.Value
 	LetterStorage atomic.Value
+}
+
+func (MemoryStorage) GetAllBots() []Bot { //todo complete
+	panic("implement me")
 }
 
 func (MemoryStorage) AddBot(name string) error {
@@ -84,27 +85,20 @@ func (MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message {
 //			return bot, nil
 //		}
 //	}
-
-	return Bot{}, errors.New("There is no bot")
-}
-
-type Message struct {
-	From    string
-	To      string
-	Subject string
-	Body    string
-}
-
-func GetLetters(token string) ([]Message, error) {
-	var base = LetterStorage.Load()
-	var letterBase map[string][]Message
-	if base == nil {
-		return nil, errors.New("Empty database")
-	}
-	letterBase = base.(map[string][]Message)
-	if val, ok := letterBase[token]; ok {
-		return val, nil
-	}
-
-	return nil, errors.New("Empty mailbox")
-}
+//
+//	return Bot{}, errors.New("There is no bot")
+//}
+//
+//func GetLetters(token string) ([]Message, error) {
+//	var base = LetterStorage.Load()
+//	var letterBase map[string][]Message
+//	if base == nil {
+//		return nil, errors.New("Empty database")
+//	}
+//	letterBase = base.(map[string][]Message)
+//	if val, ok := letterBase[token]; ok {
+//		return val, nil
+//	}
+//
+//	return nil, errors.New("Empty mailbox")
+//}

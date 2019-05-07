@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+//todo refactor
+
 func Get(token string, offset string, limit string) ([]byte, error) {
 	letters, err := data.GetLetters(token)
 	if err != nil {

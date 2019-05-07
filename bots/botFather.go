@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-var url = "http://localhost:8080/updates"
-var address = ""
+var BotFatherEmail = "" //todo add current BotFatherEmail
 
-func BotController() {
-	bot := botLib.NewMailBot(data.TokenBotFather) //todo change
+func BotController(storage data.Storage) {
+	token, _ := storage.AddBot("BotFather")
+	bot := botLib.NewMailBot(token)
 	for {
 		time.Sleep(5 * time.Second)
 		messages, err := bot.GetUpdates()
@@ -19,17 +19,19 @@ func BotController() {
 			log.Print(err)
 		}
 		for _, message := range messages {
-			go register(message, data.MemoryStorage{}) //todo fix
+			go register(message, storage) //todo fix
 		}
 	}
 }
 func register(message botLib.Message, storage data.Storage) {
-	err := storage.AddBot(message.Body)
+	token, err := storage.AddBot(message.Body)
 	if err != nil {
 		log.Print(err)
-		botLib.NewMessage(address, message.From, message.Subject, "Произошла ошибка! "+err.Error())
+		botLib.NewMessage(BotFatherEmail, message.From, "Bot registering", "Choose another name! "+err.Error())
 		return
 	}
+
+	botLib.NewMessage(BotFatherEmail, message.From, "Successful registration!", token)
 }
 
 //func getUpdates() {
@@ -64,17 +66,17 @@ func register(message botLib.Message, storage data.Storage) {
 //	}
 //}
 //
-//func registerBot(address string, name string) {
+//func registerBot(BotFatherEmail string, name string) {
 //	if !isValidAddress("name" + "@yandex.ru") {
-//		sendWelcomeMessage(address)
+//		sendWelcomeMessage(BotFatherEmail)
 //	}
 //}
 //
-//func sendWelcomeMessage(address string) {
+//func sendWelcomeMessage(BotFatherEmail string) {
 //
 //}
 //
-//func isValidAddress(address string) bool {
+//func isValidAddress(BotFatherEmail string) bool {
 //Re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-//return Re.MatchString(address)
+//return Re.MatchString(BotFatherEmail)
 //}
