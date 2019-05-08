@@ -1,8 +1,14 @@
 package mailController
 
+import "github.com/kraevskii-m/MailBot/data"
+
 //todo refactor
 
 func UpdateMailBox(token string) {
+	panic("Not Implemented")
+}
+
+func SendMessage(message data.Message) error {
 	panic("Not Implemented")
 }
 

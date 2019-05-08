@@ -63,4 +63,18 @@ var sendMessage = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 	token := vars["token"]
 	log.Print(token)
 
+	decoder := json.NewDecoder(r.Body)
+	var message data.Message
+	err := decoder.Decode(&message)
+	if err != nil {
+		http.Error(w, "Can't parse your request!", http.StatusBadRequest)
+		return
+	}
+
+	err = mailController.SendMessage(message)
+	if err != nil {
+		http.Error(w, "Can't send message!", http.StatusBadRequest)
+		return
+	}
+	w.Write([]byte("Message sent!"))
 })
