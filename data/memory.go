@@ -10,27 +10,24 @@ type Bot struct {
 	Password string
 }
 
-var BotStorage atomic.Value
-var LetterStorage atomic.Value
-
 type MemoryStorage struct {
 	BotStorage    atomic.Value
 	LetterStorage atomic.Value
 }
 
-func (MemoryStorage) GetAllBots() []Bot { //todo complete
+func (MemoryStorage) AddBot(name string) (string, error) {
 	panic("implement me")
 }
 
-func (MemoryStorage) AddBot(name string) error {
+func (MemoryStorage) GetBot(token string) (Bot, error) {
 	panic("implement me")
 }
 
-func (MemoryStorage) GetBot(token string) Bot {
+func (MemoryStorage) GetAllBots() []Bot {
 	panic("implement me")
 }
 
-func (MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message {
+func (MemoryStorage) GetMessages(bot Bot, offset string, limit string) []Message {
 	panic("implement me")
 }
 

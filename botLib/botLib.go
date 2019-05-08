@@ -9,21 +9,11 @@ import (
 	"net/http"
 )
 
-type MailBot struct {
-	Token string
-}
-
 type Message struct {
 	From    string
 	To      string
 	Subject string
 	Body    string
-}
-
-func NewMailBot(token string) *MailBot {
-	bot := new(MailBot)
-	bot.Token = token
-	return bot
 }
 
 func NewMessage(from string, to string, subject string, body string) *Message {
@@ -35,7 +25,19 @@ func NewMessage(from string, to string, subject string, body string) *Message {
 	return message
 }
 
-func (bot *MailBot) SendMessage(message Message) error { // todo add offset and limit
+type MailBot struct {
+	Token string
+	Name  string
+}
+
+func NewMailBot(token string, name string) *MailBot {
+	bot := new(MailBot)
+	bot.Token = token
+	bot.Name = name
+	return bot
+}
+
+func (bot *MailBot) SendMessage(message Message) error {
 	address := fmt.Sprintf("https://localhost:3000/bot%v/sendmessage", bot.Token)
 	data, err := json.Marshal(message)
 	if err != nil {
@@ -49,7 +51,7 @@ func (bot *MailBot) SendMessage(message Message) error { // todo add offset and 
 	return nil
 }
 
-func (bot *MailBot) GetUpdates() ([]Message, error) {
+func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) { //todo fix offset and limit
 	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.Token)
 	resp, err := http.Get(address)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 
 var BotFatherEmail = "" //todo add current BotFatherEmail
 
-func BotController(storage data.Storage) {
+func BotFatherController(storage data.Storage) {
 	token, _ := storage.AddBot("BotFather")
 	bot := botLib.NewMailBot(token)
 	for {
