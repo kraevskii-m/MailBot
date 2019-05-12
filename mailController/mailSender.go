@@ -3,6 +3,7 @@ package mailController
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/kraevskii-m/MailBot/data"
 	"log"
 	"net/smtp"
 	"strings"
@@ -37,9 +38,9 @@ func (mail *Mail) buildMessage() string {
 	return message
 }
 
-func Sender(from string, recepient string, body string, subject string) error {
+func Sender(bot data.Bot, recepient string, body string, subject string) error {
 	mail := Mail{}
-	mail.senderId = "fatherofbots@yandex.ru"
+	mail.senderId = bot.Username + "@yandex.ru"
 	mail.toIds = []string{recepient}
 	mail.subject = subject
 	mail.body = body
@@ -49,7 +50,7 @@ func Sender(from string, recepient string, body string, subject string) error {
 	smtpServer := smtpServer{host: "smtp.yandex.ru", port: "465"}
 
 	log.Println(smtpServer.host)
-	auth := smtp.PlainAuth("", mail.senderId, "lermonter07", smtpServer.host)
+	auth := smtp.PlainAuth("", mail.senderId, bot.Password, smtpServer.host)
 
 	tlsconfig := &tls.Config{
 		InsecureSkipVerify: true,

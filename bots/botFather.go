@@ -9,13 +9,14 @@ import (
 )
 
 var BotFatherEmail = "fatherofbots@yandex.ru"
+var botFather *botLib.MailBot
 
 func BotFatherController() {
 	token, _ := data.Base.AddBot("fatherofbots", "lermonter07")
-	bot := botLib.NewMailBot(token, "fatherofbots")
+	botFather = botLib.NewMailBot(token, "fatherofbots")
 	for {
 		time.Sleep(5 * time.Second)
-		messages, err := bot.GetUpdates(0, 0)
+		messages, err := botFather.GetUpdates(0, 0) //TODO fix offset/limit
 		if err != nil {
 			log.Print(err)
 		}
@@ -25,13 +26,25 @@ func BotFatherController() {
 	}
 }
 func register(message botLib.Message) {
+	if message.Subject != "Register" {
+		log.Println("Wrong subj " + message.Subject)
+		return
+	}
 	userData := strings.Fields(message.Body)
+	if len(userData) < 2 {
+		log.Println("Wrong data " + message.Body)
+		return
+	}
 	token, err := data.Base.AddBot(userData[0], userData[1])
 	if err != nil {
 		log.Print(err)
-		botLib.NewMessage(BotFatherEmail, message.From, "Bot registering", "Choose another name! "+err.Error())
+		log.Println("Bot already exist!")
+		message := botLib.NewMessage(BotFatherEmail, message.From, "Bot registering", "Choose another name! "+err.Error())
+		botFather.SendMessage(*message)
 		return
 	}
 
-	botLib.NewMessage(BotFatherEmail, message.From, "Successful registration!", token)
+	log.Println("Bot registered! " + userData[0])
+	msg := botLib.NewMessage(BotFatherEmail, message.From, "Successful registration!", token)
+	botFather.SendMessage(*msg)
 }

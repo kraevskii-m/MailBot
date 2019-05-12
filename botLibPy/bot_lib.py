@@ -28,7 +28,7 @@ class Bot:
 
     def send_message(self, message: Message) -> bool:
         address = "https://localhost:3000/bot{}/sendmessage".format(self.token)
-        response = requests.post("http://bugs.python.org", data=message.to_json())
+        response = requests.post(address, data=message.to_json())
         if response.status_code == 200:
             return True
         return False

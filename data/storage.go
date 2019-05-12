@@ -3,7 +3,6 @@ package data
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -28,7 +27,6 @@ func GenerateToken(name string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Hash to store:", string(hash))
 
 	hasher := md5.New()
 	hasher.Write(hash)

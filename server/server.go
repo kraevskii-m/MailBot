@@ -24,6 +24,7 @@ func Router() {
 }
 
 var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
 	vars := mux.Vars(r)
 	token := vars["token"]
 
@@ -69,6 +70,7 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 })
 
 var sendMessage = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
 	vars := mux.Vars(r)
 	token := vars["token"]
 

@@ -10,5 +10,5 @@ func UpdateMailBox(bot data.Bot) {
 }
 
 func SendMessage(message data.Message, bot data.Bot) error {
-	return Sender(message.From+"@yandex.ru", message.To, message.Body, message.Subject)
+	return Sender(bot, message.To, message.Body, message.Subject)
 }
