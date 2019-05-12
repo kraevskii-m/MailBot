@@ -7,6 +7,7 @@ import (
 	"github.com/kraevskii-m/MailBot/mailController"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func Router() {
@@ -43,15 +44,25 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		limit = limitQuery[0]
 	}
 
-	mailController.UpdateMailBox(token)
-
 	bot, err := data.Base.GetBot(token)
 	if err != nil {
 		http.Error(w, "Bot doesn't exist! Send message to BotFather!", http.StatusBadRequest)
 		return
 	}
+	mailController.UpdateMailBox(bot)
 
-	messages := data.Base.GetMessages(bot, offset, limit)
+	numOffset, err := strconv.Atoi(offset)
+	if err == nil {
+		http.Error(w, "Offset must be a number!", http.StatusBadRequest)
+		return
+	}
+	numLimit, err := strconv.Atoi(limit)
+	if err == nil {
+		http.Error(w, "Limit must be a number!", http.StatusBadRequest)
+		return
+	}
+
+	messages := data.Base.GetMessages(bot, numOffset, numLimit)
 	result, _ := json.Marshal(messages)
 
 	w.Write(result)

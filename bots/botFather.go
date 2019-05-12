@@ -10,8 +10,8 @@ import (
 
 var BotFatherEmail = "fatherofbots@yandex.ru"
 
-func BotFatherController(storage data.Storage) {
-	token, _ := storage.AddBot("fatherofbots", "lermonter07")
+func BotFatherController() {
+	token, _ := data.Base.AddBot("fatherofbots", "lermonter07")
 	bot := botLib.NewMailBot(token, "fatherofbots")
 	for {
 		time.Sleep(5 * time.Second)
@@ -20,13 +20,13 @@ func BotFatherController(storage data.Storage) {
 			log.Print(err)
 		}
 		for _, message := range messages {
-			register(message, storage)
+			register(message)
 		}
 	}
 }
-func register(message botLib.Message, storage data.Storage) {
+func register(message botLib.Message) {
 	userData := strings.Fields(message.Body)
-	token, err := storage.AddBot(userData[0], userData[1])
+	token, err := data.Base.AddBot(userData[0], userData[1])
 	if err != nil {
 		log.Print(err)
 		botLib.NewMessage(BotFatherEmail, message.From, "Bot registering", "Choose another name! "+err.Error())

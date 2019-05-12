@@ -15,16 +15,16 @@ type Mail struct {
 	body     string
 }
 
-type SmtpServer struct {
+type smtpServer struct {
 	host string
 	port string
 }
 
-func (s *SmtpServer) ServerName() string {
+func (s *smtpServer) serverName() string {
 	return s.host + ":" + s.port
 }
 
-func (mail *Mail) BuildMessage() string {
+func (mail *Mail) buildMessage() string {
 	message := ""
 	message += fmt.Sprintf("From: %s\r\n", mail.senderId)
 	if len(mail.toIds) > 0 {
@@ -37,16 +37,16 @@ func (mail *Mail) BuildMessage() string {
 	return message
 }
 
-func sender(from string, recepient string, body string, subject string) {
+func Sender(from string, recepient string, body string, subject string) error {
 	mail := Mail{}
 	mail.senderId = "fatherofbots@yandex.ru"
 	mail.toIds = []string{recepient}
 	mail.subject = subject
 	mail.body = body
 
-	messageBody := mail.BuildMessage()
+	messageBody := mail.buildMessage()
 
-	smtpServer := SmtpServer{host: "smtp.yandex.ru", port: "465"}
+	smtpServer := smtpServer{host: "smtp.yandex.ru", port: "465"}
 
 	log.Println(smtpServer.host)
 	auth := smtp.PlainAuth("", mail.senderId, "lermonter07", smtpServer.host)
@@ -56,45 +56,46 @@ func sender(from string, recepient string, body string, subject string) {
 		ServerName:         smtpServer.host,
 	}
 
-	conn, err := tls.Dial("tcp", smtpServer.ServerName(), tlsconfig)
+	conn, err := tls.Dial("tcp", smtpServer.serverName(), tlsconfig)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	client, err := smtp.NewClient(conn, smtpServer.host)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	if err = client.Auth(auth); err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	if err = client.Mail(mail.senderId); err != nil {
-		log.Panic(err)
+		return err
 	}
 	for _, k := range mail.toIds {
 		if err = client.Rcpt(k); err != nil {
-			log.Panic(err)
+			return err
 		}
 	}
 
 	w, err := client.Data()
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	_, err = w.Write([]byte(messageBody))
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	err = w.Close()
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	client.Quit()
 
 	log.Println("Mail sent successfully" + string(mail.toIds[0]))
+	return nil
 }
