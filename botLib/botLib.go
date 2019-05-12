@@ -65,5 +65,3 @@ func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) {
 	}
 	return messages, nil
 }
-
-func 

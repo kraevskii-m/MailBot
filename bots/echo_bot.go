@@ -1,15 +1,23 @@
 package bots
 
 import (
+	"github.com/kraevskii-m/MailBot/botLib"
 	"log"
-	"net/http"
+	"time"
 )
 
-var address = "" //todo add current BotFatherEmail
+var address = "echobot-mailbot@yandex.ru"
 
-func echoBot() { //todo complete ECHOBOT
-	resp, err := http.Get(url + "/bot" + token + "/getupdates")
-	if err != nil {
-		log.Fatal(err)
+func EchoBotController(token string) {
+	bot := botLib.NewMailBot(token, "EchoBot")
+	for {
+		time.Sleep(5 * time.Second)
+		messages, err := bot.GetUpdates(0, 0)
+		if err != nil {
+			log.Print(err)
+		}
+		for _, message := range messages {
+			botLib.NewMessage(address, message.From, message.Subject, message.Body)
+		}
 	}
 }
