@@ -1,11 +1,14 @@
 package mailController
 
-import "github.com/kraevskii-m/MailBot/data"
+import (
+	"github.com/kraevskii-m/MailBot/data"
+	"log"
+)
 
 //todo refactor
 
-func UpdateMailBox(token string) {
-	panic("Not Implemented")
+func UpdateMailBox(bot data.Bot) error {
+
 }
 
 func SendMessage(message data.Message, bot data.Bot) error {

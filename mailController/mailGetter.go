@@ -8,32 +8,17 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"sync/atomic"
 	"time"
 )
 
-var MessagesBase atomic.Value //todo not thread safe
-
-func GetUpdatesForBot(token string) []data.Message {
-
-}
-
-func getCuttentMessages() []SendMailStruct {
-	var mbase = MessagesBase.Load()
-	if mbase == nil {
-		return []SendMailStruct{}
-	}
-	return mbase.([]SendMailStruct)
-}
-
-func mailGetter() { // todo Store content type
+func checkMailBox(bot data.Bot) []data.Message {
 	c, err := client.DialTLS("imap.yandex.ru:993", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Connected")
 
-	if err := c.Login("fatherofbots", "lermonter07"); err != nil {
+	if err := c.Login(bot.Username, bot.Password); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Logged in")
@@ -41,7 +26,6 @@ func mailGetter() { // todo Store content type
 	defer c.Logout()
 
 	for {
-		var mbase = getCuttentMessages()
 		mbox, err := c.Select("INBOX", false)
 		if err != nil {
 			log.Fatal(err)
@@ -51,7 +35,7 @@ func mailGetter() { // todo Store content type
 		}
 		time.Sleep(time.Second * 5)
 
-		from := uint32(len(mbase) + 1)
+		from := uint32(1)
 		to := mbox.Messages
 		if from > to {
 			continue
@@ -68,6 +52,8 @@ func mailGetter() { // todo Store content type
 				log.Fatal(err)
 			}
 		}()
+
+		var output []data.Message
 
 		for msg := range messages {
 			if msg == nil {
@@ -97,9 +83,10 @@ func mailGetter() { // todo Store content type
 				case mail.TextHeader:
 					b, _ := ioutil.ReadAll(p.Body)
 					from, _ := header.AddressList("From")
+					to, _ := header.AddressList("To")
 					subject, _ := header.Subject()
-					var tempMessages = append(mbase, SendMailStruct{from[0].Address, string(b), subject})
-					MessagesBase.Store(tempMessages)
+					message := data.Message{From: from[0].Address, To: to[0].Address, Subject: subject, Body: string(b)}
+					output = append(output, message) //todo fix
 				case mail.AttachmentHeader:
 					filename, _ := h.Filename()
 					log.Println("Got attachment: %v", filename)

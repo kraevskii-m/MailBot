@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"sync/atomic"
 )
 
@@ -15,87 +16,60 @@ type MemoryStorage struct {
 	LetterStorage atomic.Value
 }
 
-func (MemoryStorage) AddBot(name string) (string, error) {
-	panic("implement me")
+func (m *MemoryStorage) AddMessages(messages []Message, token string) {
+	var base = m.LetterStorage.Load()
+	var letterBase map[string][]Message
+	if base != nil {
+		letterBase = base.(map[string][]Message)
+	}
+	letterBase[token] = append(letterBase[token], messages...)
+	m.LetterStorage.Store(letterBase)
 }
 
-func (MemoryStorage) GetBot(token string) (Bot, error) {
-	panic("implement me")
+func (m *MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message { //todo offset and limit
+	var base = m.LetterStorage.Load()
+	var letterBase map[string][]Message
+	if base != nil {
+		letterBase = base.(map[string][]Message)
+	}
+	return letterBase[bot.Token]
 }
 
-func (MemoryStorage) GetAllBots() []Bot {
-	panic("implement me")
+func (m *MemoryStorage) AddBot(username string, password string) (string, error) {
+	botProfile := Bot{Token: GenerateToken(username), Username: username, Password: password}
+	_, err := m.GetBot(botProfile.Token)
+	if err != nil {
+		return "", errors.New("BOT ALREADY EXIST")
+	}
+	var base = m.BotStorage.Load()
+	var botBase []Bot
+	if base != nil {
+		botBase = base.([]Bot)
+	}
+	botBase = append(botBase, botProfile)
+	m.BotStorage.Store(botBase)
+	return botProfile.Token, nil
 }
 
-func (MemoryStorage) GetMessages(bot Bot, offset string, limit string) []Message {
-	panic("implement me")
+func (m *MemoryStorage) GetBot(token string) (Bot, error) {
+	var base = m.BotStorage.Load()
+	var botBase []Bot
+	if base != nil {
+		botBase = base.([]Bot)
+	}
+	for _, bot := range botBase {
+		if bot.Token == token {
+			return bot, nil
+		}
+	}
+	return Bot{}, errors.New("CANNOT FIND BOT")
 }
 
-// //todo obsolete
-//func NewBot(name string) Bot {
-//	output := Bot{}
-//	if name == "botfather" {
-//		output.Token = "qwertyui"
-//		output.Username = "fatherofbots"
-//		output.Password = "lermonter07"
-//	}
-//	if name == "echobot" {
-//		output.Token = "asdfghjk"
-//		output.Username = "echobot-mailbot"
-//		output.Password = "lermonter07"
-//	}
-//
-//	var base = BotStorage.Load()
-//	var botBase []Bot
-//	if base != nil {
-//		botBase = base.([]Bot)
-//	}
-//	botBase = append(botBase, output)
-//	BotStorage.Store(botBase)
-//
-//	var mailBase = LetterStorage.Load()
-//	var letterBase map[string][]Message
-//	if mailBase != nil {
-//		letterBase = mailBase.(map[string][]Message)
-//	}
-//	letterBase[output.Token] = []Message{}
-//	LetterStorage.Store(letterBase)
-//
-//	return output
-//}
-//
-//func GetBot(name string) (Bot, error) {
-//	var bots = BotStorage.Load().([]Bot)
-//	for _, bot := range bots {
-//		if bot.Username == name {
-//			return bot, nil
-//		}
-//	}
-//
-//	return Bot{}, errors.New("There is no bot")
-//}
-//
-//func GetByToken(token string) (Bot, error) {
-//	var bots = BotStorage.Load().([]Bot)
-//	for _, bot := range bots {
-//		if bot.Token == token {
-//			return bot, nil
-//		}
-//	}
-//
-//	return Bot{}, errors.New("There is no bot")
-//}
-//
-//func GetLetters(token string) ([]Message, error) {
-//	var base = LetterStorage.Load()
-//	var letterBase map[string][]Message
-//	if base == nil {
-//		return nil, errors.New("Empty database")
-//	}
-//	letterBase = base.(map[string][]Message)
-//	if val, ok := letterBase[token]; ok {
-//		return val, nil
-//	}
-//
-//	return nil, errors.New("Empty mailbox")
-//}
+func (m *MemoryStorage) GetAllBots() []Bot {
+	var base = m.BotStorage.Load()
+	var botBase []Bot
+	if base != nil {
+		botBase = base.([]Bot)
+	}
+	return botBase
+}

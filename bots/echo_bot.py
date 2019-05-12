@@ -1,23 +1,10 @@
-import json
+import botLibPy.bot_lib as bot_lib
 
-import requests
+TOKEN = ""
+address = "echobot-mailbot@yandex.ru"
 
-url = 'http://localhost:3000' //todo add py library and rewrite
-
-
-class Mail:
-
-    def __init__(self, address, body, subject):
-        self.body = body
-        self.address = address
-        self.subject = subject
-
-resp = requests.get(url=url + "/updates")
-data = resp.json()
-
-letters = []
-for d in data:
-    letters.append(Mail(d[0], d[1], d[2]))
-
-r = requests.post(url=url + "/send", data=json.dumps(data))
-print(r.status_code, r.reason)
+bot = bot_lib.Bot(TOKEN)
+while True:
+    messages = bot.get_updates(0, 0)  # todo use offset and limit
+    for message in messages:
+        bot.send_message(bot_lib.Message(address, message.fr, message.subj, message.body))

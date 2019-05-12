@@ -1,5 +1,13 @@
 package data
 
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+	"log"
+)
+
 type Message struct {
 	From    string
 	To      string
@@ -8,14 +16,23 @@ type Message struct {
 }
 
 type Storage interface {
-	AddBot(name string) (string, error)
+	AddBot(username string, password string) (string, error)
 	GetBot(token string) (Bot, error)
 	GetAllBots() []Bot
-	GetMessages(bot Bot, offset string, limit string) []Message
+	GetMessages(bot Bot, offset int, limit int) []Message
+	AddMessages(messages []Message, token string)
 }
 
-func GenerateToken() string { // todo implement
-	panic("Implement me")
+func GenerateToken(name string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(name), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Hash to store:", string(hash))
+
+	hasher := md5.New()
+	hasher.Write(hash)
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 var Base = MemoryStorage{}

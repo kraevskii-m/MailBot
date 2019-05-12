@@ -50,7 +50,7 @@ func (bot *MailBot) SendMessage(message Message) error {
 }
 
 func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) {
-	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.Token)
+	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates?offset=%v&limit=%v", bot.Token, offset, limit)
 	resp, err := http.Get(address)
 	if err != nil {
 		return nil, err
