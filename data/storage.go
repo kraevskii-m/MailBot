@@ -18,4 +18,4 @@ func GenerateToken() string { // todo implement
 	panic("Implement me")
 }
 
-var DataBase = MemoryStorage{}
+var Base = MemoryStorage{}

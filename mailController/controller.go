@@ -8,7 +8,7 @@ func UpdateMailBox(token string) {
 	panic("Not Implemented")
 }
 
-func SendMessage(message data.Message) error {
+func SendMessage(message data.Message, bot data.Bot) error {
 	panic("Not Implemented")
 }
 

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -51,19 +49,21 @@ func (bot *MailBot) SendMessage(message Message) error {
 	return nil
 }
 
-func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) { //todo fix offset and limit
+func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) {
 	address := fmt.Sprintf("https://localhost:3000/bot%v/getupdates", bot.Token)
 	resp, err := http.Get(address)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+
+	decoder := json.NewDecoder(resp.Body)
 	var messages []Message
-	err = json.Unmarshal(body, &messages)
+	err = decoder.Decode(&messages)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	return messages, nil
 }
+
+func 

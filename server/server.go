@@ -45,14 +45,13 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	mailController.UpdateMailBox(token)
 
-	bot, err := data.DataBase.GetBot(token)
-
+	bot, err := data.Base.GetBot(token)
 	if err != nil {
 		http.Error(w, "Bot doesn't exist! Send message to BotFather!", http.StatusBadRequest)
 		return
 	}
 
-	messages := data.DataBase.GetMessages(bot, offset, limit)
+	messages := data.Base.GetMessages(bot, offset, limit)
 	result, _ := json.Marshal(messages)
 
 	w.Write(result)
@@ -61,17 +60,22 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 var sendMessage = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	token := vars["token"]
-	log.Print(token)
+
+	bot, err := data.Base.GetBot(token)
+	if err != nil {
+		http.Error(w, "Bot doesn't exist! Send message to BotFather!", http.StatusBadRequest)
+		return
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	var message data.Message
-	err := decoder.Decode(&message)
+	err = decoder.Decode(&message)
 	if err != nil {
 		http.Error(w, "Can't parse your request!", http.StatusBadRequest)
 		return
 	}
 
-	err = mailController.SendMessage(message)
+	err = mailController.SendMessage(message, bot)
 	if err != nil {
 		http.Error(w, "Can't send message!", http.StatusBadRequest)
 		return
