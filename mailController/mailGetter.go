@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"time"
 )
 
 func checkMailBox(bot data.Bot) []data.Message {
@@ -33,8 +32,6 @@ func checkMailBox(bot data.Bot) []data.Message {
 		if mbox.Messages == 0 {
 			log.Println("No messages in mailbox")
 		}
-		time.Sleep(time.Second * 5)
-
 		from := uint32(1)
 		to := mbox.Messages
 		if from > to {
@@ -93,5 +90,6 @@ func checkMailBox(bot data.Bot) []data.Message {
 				}
 			}
 		}
+		return output
 	}
 }

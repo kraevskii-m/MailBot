@@ -52,12 +52,12 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	mailController.UpdateMailBox(bot)
 
 	numOffset, err := strconv.Atoi(offset)
-	if err == nil {
+	if err != nil {
 		http.Error(w, "Offset must be a number!", http.StatusBadRequest)
 		return
 	}
 	numLimit, err := strconv.Atoi(limit)
-	if err == nil {
+	if err != nil {
 		http.Error(w, "Limit must be a number!", http.StatusBadRequest)
 		return
 	}

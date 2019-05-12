@@ -18,11 +18,15 @@ type MemoryStorage struct {
 
 func (m *MemoryStorage) AddMessages(messages []Message, token string) {
 	var base = m.LetterStorage.Load()
-	var letterBase map[string][]Message
+	letterBase := make(map[string][]Message)
 	if base != nil {
 		letterBase = base.(map[string][]Message)
 	}
-	letterBase[token] = append(letterBase[token], messages...)
+	if val, ok := letterBase[token]; ok {
+		letterBase[token] = append(val, messages...)
+	} else {
+		letterBase[token] = messages
+	}
 	m.LetterStorage.Store(letterBase)
 }
 
@@ -38,7 +42,7 @@ func (m *MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message { 
 func (m *MemoryStorage) AddBot(username string, password string) (string, error) {
 	botProfile := Bot{Token: GenerateToken(username), Username: username, Password: password}
 	_, err := m.GetBot(botProfile.Token)
-	if err != nil {
+	if err == nil {
 		return "", errors.New("BOT ALREADY EXIST")
 	}
 	var base = m.BotStorage.Load()
