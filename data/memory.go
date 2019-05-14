@@ -16,27 +16,41 @@ type MemoryStorage struct {
 	LetterStorage atomic.Value
 }
 
+func (m *MemoryStorage) RemoveBot(bot Bot) {
+	var base = m.BotStorage.Load()
+	var botBase []Bot
+	if base != nil {
+		botBase = base.([]Bot)
+	}
+	for i, b := range botBase {
+		if b.Token == bot.Token {
+			botBase = append(botBase[:i], botBase[i+1:]...)
+		}
+	}
+	m.BotStorage.Store(botBase)
+}
+
 func (m *MemoryStorage) AddMessages(messages []Message, token string) {
 	var base = m.LetterStorage.Load()
 	letterBase := make(map[string][]Message)
 	if base != nil {
 		letterBase = base.(map[string][]Message)
 	}
-	if val, ok := letterBase[token]; ok {
-		letterBase[token] = append(val, messages...)
-	} else {
-		letterBase[token] = messages
-	}
+	letterBase[token] = messages
 	m.LetterStorage.Store(letterBase)
 }
 
-func (m *MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message { //todo offset and limit
+func (m *MemoryStorage) GetMessages(bot Bot, offset int, limit int) []Message {
 	var base = m.LetterStorage.Load()
 	var letterBase map[string][]Message
 	if base != nil {
 		letterBase = base.(map[string][]Message)
 	}
-	return letterBase[bot.Token]
+	messsages := letterBase[bot.Token]
+	if offset >= len(messsages) {
+		return nil
+	}
+	return messsages[offset:min(offset+limit, len(messsages))]
 }
 
 func (m *MemoryStorage) AddBot(username string, password string) (string, error) {
@@ -76,4 +90,11 @@ func (m *MemoryStorage) GetAllBots() []Bot {
 		botBase = base.([]Bot)
 	}
 	return botBase
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

@@ -1,10 +1,15 @@
 package tests
 
 import (
+	"github.com/kraevskii-m/MailBot/data"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
+
+func TestConnection(t *testing.T) {
+	data.Connect()
+}
 
 func TestMainPage(t *testing.T) {
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll

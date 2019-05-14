@@ -18,12 +18,16 @@ class Message:
 class Bot:
     def __init__(self, token: str) -> None:
         self.token = token
+        self.id = 0
 
-    def get_updates(self, offset: int, limit: int) -> List[Message]:
+    def get_updates(self) -> List[Message]:
+        offset = self.id
+        limit = 10
         address = "https://localhost:3000/bot{}/getupdates?offset={}&limit={}".format(self.token, offset, limit)
         response = requests.get(address)
         decoded = json.load(response)
         result = list(map(lambda x: Message.from_json(x), decoded))
+        self.id += len(result)
         return result
 
     def send_message(self, message: Message) -> bool:

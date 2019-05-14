@@ -20,6 +20,7 @@ type Storage interface {
 	GetAllBots() []Bot
 	GetMessages(bot Bot, offset int, limit int) []Message
 	AddMessages(messages []Message, token string)
+	RemoveBot(bot Bot)
 }
 
 func GenerateToken(name string) string {

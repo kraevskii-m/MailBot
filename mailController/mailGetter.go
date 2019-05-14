@@ -1,6 +1,7 @@
 package mailController
 
 import (
+	"errors"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
@@ -10,15 +11,15 @@ import (
 	"log"
 )
 
-func checkMailBox(bot data.Bot) []data.Message {
+func checkMailBox(bot data.Bot) ([]data.Message, error) {
 	c, err := client.DialTLS("imap.yandex.ru:993", nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	log.Println("Connected")
 
 	if err := c.Login(bot.Username, bot.Password); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	log.Println("Logged in")
 
@@ -27,7 +28,7 @@ func checkMailBox(bot data.Bot) []data.Message {
 	for {
 		mbox, err := c.Select("INBOX", false)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		if mbox.Messages == 0 {
 			log.Println("No messages in mailbox")
@@ -46,7 +47,7 @@ func checkMailBox(bot data.Bot) []data.Message {
 		messages := make(chan *imap.Message)
 		go func() {
 			if err := c.Fetch(seqset, items, messages); err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		}()
 
@@ -54,17 +55,17 @@ func checkMailBox(bot data.Bot) []data.Message {
 
 		for msg := range messages {
 			if msg == nil {
-				log.Fatal("Server didn't returned message")
+				return nil, errors.New("Server didn't returned message")
 			}
 
 			r := msg.GetBody(section)
 			if r == nil {
-				log.Fatal("Server didn't returned message body")
+				return nil, errors.New("Server didn't returned message body")
 			}
 
 			mr, err := mail.CreateReader(r)
 			if err != nil {
-				log.Fatal(err)
+				return nil, err
 			}
 
 			for {
@@ -72,7 +73,7 @@ func checkMailBox(bot data.Bot) []data.Message {
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					log.Fatal(err)
+					return nil, err
 				}
 
 				header := mr.Header
@@ -83,13 +84,13 @@ func checkMailBox(bot data.Bot) []data.Message {
 					to, _ := header.AddressList("To")
 					subject, _ := header.Subject()
 					message := data.Message{From: from[0].Address, To: to[0].Address, Subject: subject, Body: string(b)}
-					output = append(output, message) //todo fix
+					output = append(output, message)
 				case mail.AttachmentHeader:
 					filename, _ := h.Filename()
 					log.Println("Got attachment: %v", filename)
 				}
 			}
 		}
-		return output
+		return output, nil
 	}
 }

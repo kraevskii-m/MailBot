@@ -32,7 +32,7 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var limit string
 
 	offsetQuery, ok := r.URL.Query()["offset"]
-	if !ok || len(offsetQuery[0]) < 1 { //todo test
+	if !ok || len(offsetQuery[0]) < 1 {
 		offset = ""
 	} else {
 		offset = offsetQuery[0]
@@ -50,7 +50,6 @@ var getUpdates = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bot doesn't exist! Send message to BotFather!", http.StatusBadRequest)
 		return
 	}
-	mailController.UpdateMailBox(bot)
 
 	numOffset, err := strconv.Atoi(offset)
 	if err != nil {

@@ -97,6 +97,6 @@ func Sender(bot data.Bot, recepient string, body string, subject string) error {
 
 	client.Quit()
 
-	log.Println("Mail sent successfully" + string(mail.toIds[0]))
+	log.Println("Mail sent successfully " + string(mail.toIds[0]))
 	return nil
 }

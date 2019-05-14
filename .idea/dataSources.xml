@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="PostgreSQL - postgres@localhost" uuid="cee2d7d7-d0af-4e64-84e9-9170b85ef004">
+    <data-source source="LOCAL" name="YandexCloudPostgres" uuid="2583de14-beae-4810-b43b-f57e17dae05f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/postgres</jdbc-url>
+      <jdbc-url>jdbc:postgresql://rc1a-1b2ptayjq5wp17wt.mdb.yandexcloud.net:6432/mail_bot</jdbc-url>
+      <driver-properties>
+        <property name="sslmode" value="verify-full" />
+        <property name="ssl" value="true" />
+      </driver-properties>
     </data-source>
   </component>
 </project>

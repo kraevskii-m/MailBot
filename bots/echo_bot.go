@@ -12,7 +12,7 @@ func EchoBotController(token string) {
 	bot := botLib.NewMailBot(token, "EchoBot")
 	for {
 		time.Sleep(5 * time.Second)
-		messages, err := bot.GetUpdates(0, 0) //todo use offset and limit
+		messages, err := bot.GetUpdates()
 		if err != nil {
 			log.Print(err)
 		}

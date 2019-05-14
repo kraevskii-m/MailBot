@@ -26,12 +26,14 @@ func NewMessage(from string, to string, subject string, body string) *Message {
 type MailBot struct {
 	Token string
 	Name  string
+	Id    int
 }
 
 func NewMailBot(token string, name string) *MailBot {
 	bot := new(MailBot)
 	bot.Token = token
 	bot.Name = name
+	bot.Id = 0
 	return bot
 }
 
@@ -49,7 +51,9 @@ func (bot *MailBot) SendMessage(message Message) error {
 	return nil
 }
 
-func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) {
+func (bot *MailBot) GetUpdates() ([]Message, error) {
+	offset := bot.Id
+	limit := 10
 	address := fmt.Sprintf("http://localhost:3000/bot%v/getupdates?offset=%v&limit=%v", bot.Token, offset, limit)
 	resp, err := http.Get(address)
 	if err != nil {
@@ -63,5 +67,6 @@ func (bot *MailBot) GetUpdates(offset int, limit int) ([]Message, error) {
 	if err != nil {
 		return nil, err
 	}
+	bot.Id += len(messages)
 	return messages, nil
 }

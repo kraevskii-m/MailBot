@@ -16,7 +16,7 @@ func BotFatherController() {
 	botFather = botLib.NewMailBot(token, "fatherofbots")
 	for {
 		time.Sleep(5 * time.Second)
-		messages, err := botFather.GetUpdates(0, 0) //TODO fix offset/limit
+		messages, err := botFather.GetUpdates()
 		if err != nil {
 			log.Print(err)
 		}
@@ -35,7 +35,10 @@ func register(message botLib.Message) {
 		log.Println("Wrong data " + message.Body)
 		return
 	}
-	token, err := data.Base.AddBot(userData[0], userData[1])
+	login := strings.Replace(userData[0], "<div>", "", -1) //todo Change for better solution
+	password := strings.Replace(userData[0], "</div>", "", -1)
+
+	token, err := data.Base.AddBot(login, password)
 	if err != nil {
 		log.Print(err)
 		log.Println("Bot already exist!")
@@ -44,7 +47,13 @@ func register(message botLib.Message) {
 		return
 	}
 
-	log.Println("Bot registered! " + userData[0])
+	log.Println("Bot registered! " + login)
 	msg := botLib.NewMessage(BotFatherEmail, message.From, "Successful registration!", token)
+	botFather.SendMessage(*msg)
+}
+
+func RemoveBot(bot data.Bot) {
+	data.Base.RemoveBot(bot)
+	msg := botLib.NewMessage(BotFatherEmail, bot.Username+"yandex.ru", "Can't log in!", "Wrong credentials, bot removed!")
 	botFather.SendMessage(*msg)
 }
