@@ -50,17 +50,18 @@ def get_task(last_answer: bool, user_tasks: list) -> Task:
     if len(remaining_tasks) == 0:
         raise NoRemainingTasksException
     if last_answer:
-        for index, t in enumerate(remaining_tasks):
+        for i, t in enumerate(remaining_tasks):
             if t.task_level > user_tasks[-1].task_level:
                 return t
         return remaining_tasks[-1]
-    for index, t in reversed(enumerate(remaining_tasks)):
+    for i, t in enumerate(reversed(remaining_tasks)):
         if t.task_level < user_tasks[-1].task_level:
             return t
     return remaining_tasks[0]
 
 
-def send_task(us: User, answer: str):
+def send_task(user_id: int, answer: str):
+    us = users[user_id]
     if len(us.tasks) == 0:
         us.tasks.append(tasks[len(tasks) // 2])
         bot.send_message(bot_lib.Message(address, us.address, "Новая задача", us.tasks[-1].task_text))
@@ -75,18 +76,17 @@ def send_task(us: User, answer: str):
     bot.send_message(bot_lib.Message(address, us.address, "Новая задача", us.tasks[-1].task_text))
 
 
-
 while True:
     time.sleep(5)
     messages = bot.get_updates()
     for message in messages:
         sent = False
-        for us in users:
-            if us.address == message.fr:
-                send_task(us, message.body)
+        for index, u in enumerate(users):
+            if u.address == message.fr:
+                send_task(index, message.body)
                 sent = True
                 break
         if not sent:
-            us = User(message.fr, [])
-            users.append(us)
-            send_task(us, "")
+            u = User(message.fr, [])
+            users.append(u)
+            send_task(len(users) - 1, "")
